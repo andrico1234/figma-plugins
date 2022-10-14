@@ -1,0 +1,159 @@
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Quicksand&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<form>
+  <div id="wrapper" class="stack">
+    <h2>gRADient</h2>
+    <div>
+      <p>Standard gradient</p>
+      <div class="gradient bad"></div>
+    </div>
+    <div>
+      <p>with gRADient</p>
+      <div class="gradient good"></div>
+    </div>
+
+    <div class="color-inputs">
+      <div class="color-wrapper">
+        <input id="startColor" name="startColor" value="#ffcb0f" type="color" />
+
+        <label aria-label="start color" for="startColor">Start</label>
+      </div>
+      <div class="color-wrapper">
+        <label aria-label="end color" id="endColor">End</label>
+
+        <input id="endColor" name="endColor" value="#020533" type="color" />
+      </div>
+    </div>
+
+    <div>
+      <button id="create">Generate</button>
+      <button id="cancel">Close</button>
+    </div>
+  </div>
+</form>
+
+<script>
+  const formEl = document.querySelector("form");
+  const gradientBadEl = document.querySelector(".gradient.bad");
+  const gradientGoodEl = document.querySelector(".gradient.good");
+  const startColorEl = document.querySelector("[name=startColor]");
+  const endColorEl = document.querySelector("[name=endColor]");
+
+  function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
+  }
+
+  function updateGradients(startColor, endColor) {
+    const colors = chroma.scale([startColor, endColor]).mode("lch").colors(6);
+
+    gradientBadEl.style.background = `linear-gradient(to right, ${startColor}, ${endColor})`;
+    gradientGoodEl.style.background = `linear-gradient(to right, ${colors.join(
+      ","
+    )})`;
+  }
+
+  updateGradients("#ffcb0f", "#020533");
+
+  formEl.onchange = (e) => {
+    const startColor = startColorEl.value;
+    const endColor = endColorEl.value;
+
+    updateGradients(startColor, endColor);
+  };
+
+  document.getElementById("create").onclick = () => {
+    const startColor = startColorEl.value;
+    const endColor = endColorEl.value;
+
+    const rgbColors = chroma
+      .scale([startColor, endColor])
+      .mode("lch")
+      .colors(6);
+
+    const colors = rgbColors.map((color) => {
+      return hexToRgb(color);
+    });
+
+    parent.postMessage({ pluginMessage: { type: "generate", colors } }, "*");
+  };
+
+  document.getElementById("cancel").onclick = () => {
+    parent.postMessage({ pluginMessage: { type: "cancel" } }, "*");
+  };
+</script>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    font-family: "Quicksand", sans-serif;
+    box-sizing: border-box;
+    font-size: 1rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  .stack > * + * {
+    margin-top: 8px;
+  }
+
+  .color-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .color-wrapper:last-child {
+    justify-content: end;
+  }
+
+  .color-inputs {
+    display: flex;
+  }
+
+  input[type="color"] {
+    height: 40px;
+    padding: 6px;
+    margin: 0;
+    width: 40px;
+    background-color: none;
+    border: 1px solid #2f343c;
+    border-radius: 4px;
+  }
+
+  body {
+    padding: 8px;
+    margin-top: 0;
+  }
+
+  button {
+    border: 1px solid #2f343c;
+    border-radius: 4px;
+    padding: 8px;
+  }
+
+  .gradient {
+    height: 80px;
+    width: 300px;
+    border-radius: 4px;
+  }
+</style>

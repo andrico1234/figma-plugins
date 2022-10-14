@@ -1,0 +1,10 @@
+{
+  "name": "gradient-plugin",
+  "id": "1162311217777597381",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "ui": "ui.html"
+}

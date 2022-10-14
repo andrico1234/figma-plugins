@@ -1,0 +1,20 @@
+{
+  "name": "gradient-plugin",
+  "version": "1.0.0",
+  "description": "Your Figma Plugin",
+  "main": "code.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "npm run build -- --watch"
+  },
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "chroma-js": "2.4.2"
+  },
+  "devDependencies": {
+    "@types/chroma-js": "^2.1.4",
+    "@figma/plugin-typings": "*",
+    "typescript": "*"
+  }
+}
