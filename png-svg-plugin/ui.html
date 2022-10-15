@@ -1,0 +1,55 @@
+<script>
+  function generateRect(xPos, yPos, fill) {
+    return `<rect x="${xPos}" y="${yPos}" width="1" height="1" fill="${fill}"/>\n`;
+  }
+
+  /**
+   * Putting an element into the canvas lets us read the individual pixels
+   */
+  async function decode(bytes) {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const url = URL.createObjectURL(new Blob([bytes]));
+
+    console.log(url);
+
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject();
+      img.src = url;
+    });
+
+    canvas.width = image.width;
+    canvas.height = image.height;
+    ctx.drawImage(image, 0, 0);
+    const imageData = ctx.getImageData(0, 0, image.width, image.height);
+    return imageData;
+  }
+
+  window.onmessage = async (event) => {
+    const bytes = event.data.pluginMessage;
+    const imageData = await decode(bytes);
+    const pixels = imageData.data;
+
+    let svg = `<svg viewBox="0 0 ${imageData.width} ${imageData.height}" xmlns="http://www.w3.org/2000/svg" fill="none">`;
+
+    for (let i = 0; i < pixels.length; i += 4) {
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+      const a = pixels[i + 3];
+
+      const alpha = a / 255;
+
+      const rgba = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+
+      const rect = generateRect((i / 4) % 32, i / 4 / 32, rgba);
+      svg += rect;
+    }
+
+    svg += `</svg>`;
+
+    window.parent.postMessage({ pluginMessage: svg }, "*");
+  };
+</script>
