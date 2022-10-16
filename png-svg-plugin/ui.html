@@ -11,8 +11,6 @@
     const ctx = canvas.getContext("2d");
     const url = URL.createObjectURL(new Blob([bytes]));
 
-    console.log(url);
-
     const image = await new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
@@ -30,6 +28,7 @@
   window.onmessage = async (event) => {
     const bytes = event.data.pluginMessage;
     const imageData = await decode(bytes);
+
     const pixels = imageData.data;
 
     let svg = `<svg viewBox="0 0 ${imageData.width} ${imageData.height}" xmlns="http://www.w3.org/2000/svg" fill="none">`;
@@ -44,7 +43,11 @@
 
       const rgba = `rgba(${r}, ${g}, ${b}, ${alpha})`;
 
-      const rect = generateRect((i / 4) % 32, i / 4 / 32, rgba);
+      const rect = generateRect(
+        (i / 4) % imageData.width,
+        i / 4 / imageData.width,
+        rgba
+      );
       svg += rect;
     }
 

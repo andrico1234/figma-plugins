@@ -39,6 +39,7 @@ async function convert(paint: ImagePaint) {
 
   const nodes: SceneNode[] = [];
 
+  nodes.push(parentFrame);
   figma.currentPage.selection = nodes;
   figma.viewport.scrollAndZoomIntoView(nodes);
 
