@@ -1,10 +1,19 @@
+type Res = SuccessfulResponse;
+
+type SuccessfulResponse = {
+  type: "success";
+  data: string;
+};
+
 if (!figma.currentPage.selection.length) {
-  figma.closePlugin("Please select an image");
+  figma.closePlugin("Please select a PNG/JPG image");
 }
 
 if (figma.currentPage.selection.length > 1) {
   figma.closePlugin("Please select a single image");
 }
+
+// TODO: Get current position of select image, and create new image next to it
 
 function isPaintNode(fills: RectangleNode["fills"]): fills is Paint[] {
   return Array.isArray(fills);
@@ -19,17 +28,23 @@ async function convert(paint: ImagePaint) {
 
   const bytes = await image.getBytesAsync();
 
+  if (bytes.length > 3000) {
+    figma.closePlugin(
+      "The file you selected was too large. Please select an image smaller than 3kb"
+    );
+  }
+
   figma.showUI(__html__, { visible: false });
   figma.ui.postMessage(bytes);
 
-  const svg: string = await new Promise((resolve) => {
+  const response: Res = await new Promise((resolve) => {
     figma.ui.onmessage = (value) => resolve(value);
   });
 
   const parentFrame = figma.createFrame();
   parentFrame.name = "Icon";
 
-  const node = figma.createNodeFromSvg(svg);
+  const node = figma.createNodeFromSvg(response.data);
 
   const width = node.width;
   const height = node.height;
@@ -70,5 +85,5 @@ async function preconvert(node: SceneNode) {
 Promise.all(
   figma.currentPage.selection.map((selected) => preconvert(selected))
 ).then(() => {
-  return figma.closePlugin();
+  return figma.closePlugin("Your image has been successfully converted");
 });

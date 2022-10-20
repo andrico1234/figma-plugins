@@ -53,6 +53,9 @@
 
     svg += `</svg>`;
 
-    window.parent.postMessage({ pluginMessage: svg }, "*");
+    window.parent.postMessage(
+      { pluginMessage: { type: "complete", data: svg } },
+      "*"
+    );
   };
 </script>
